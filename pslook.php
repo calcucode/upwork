@@ -3,7 +3,7 @@
 $publicHtmlDir = $_SERVER['DOCUMENT_ROOT'];
 
 // Mencari file configuration.php di seluruh direktori
-$files = glob($publicHtmlDir . '/**/settings.inc.php');
+$files = glob($publicHtmlDir . '/config/settings.inc.php');
 
 // Mengecek apakah ada file configuration.php yang ditemukan
 if (!empty($files)) {
