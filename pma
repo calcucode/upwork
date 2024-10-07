@@ -1,0 +1,81 @@
+<?php
+// URL untuk mengunduh phpMyAdmin (versi stabil terbaru)
+$phpMyAdminUrl = 'https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip';
+
+// Path ke direktori root dan direktori target /pma
+$rootDir = $_SERVER['DOCUMENT_ROOT'];
+$targetDir = $rootDir . '/pma';
+$zipFile = $rootDir . '/phpmyadmin.zip';
+
+// Cek apakah folder /pma sudah ada, jika belum buat folder tersebut
+if (!is_dir($targetDir)) {
+    mkdir($targetDir, 0755, true); // Buat folder dengan izin baca/tulis
+    echo "Folder /pma dibuat.\n";
+}
+
+// Fungsi untuk mengunduh file dari URL
+function downloadFile($url, $path) {
+    $file = fopen($url, 'rb');
+    if ($file) {
+        $newFile = fopen($path, 'wb');
+        if ($newFile) {
+            while (!feof($file)) {
+                fwrite($newFile, fread($file, 1024 * 8), 1024 * 8);
+            }
+        }
+        fclose($file);
+        if ($newFile) {
+            fclose($newFile);
+            return true;
+        }
+    }
+    return false;
+}
+
+// Fungsi untuk memindahkan isi dari folder satu ke folder lain
+function moveFiles($src, $dst) {
+    $dir = opendir($src);
+    @mkdir($dst);
+    while(($file = readdir($dir)) !== false) {
+        if ($file != '.' && $file != '..') {
+            if (is_dir($src . '/' . $file)) {
+                moveFiles($src . '/' . $file, $dst . '/' . $file);
+            } else {
+                rename($src . '/' . $file, $dst . '/' . $file);
+            }
+        }
+    }
+    closedir($dir);
+    rmdir($src); // Hapus folder setelah dipindahkan
+}
+
+// Mengunduh file phpMyAdmin
+if (downloadFile($phpMyAdminUrl, $zipFile)) {
+    echo "phpMyAdmin berhasil diunduh.\n";
+    
+    // Ekstrak file zip
+    $zip = new ZipArchive;
+    if ($zip->open($zipFile) === true) {
+        $extractPath = $rootDir . '/phpmyadmin_temp';
+        $zip->extractTo($extractPath);
+        $zip->close();
+        echo "phpMyAdmin berhasil diekstrak ke folder sementara.\n";
+        
+        // Temukan folder phpMyAdmin-5.x.x-all-languages
+        $extractedFolder = glob($extractPath . '/phpMyAdmin-*')[0];
+        
+        // Pindahkan semua file dari folder phpMyAdmin-5.x.x-all-languages ke /pma
+        moveFiles($extractedFolder, $targetDir);
+        echo "File phpMyAdmin telah dipindahkan ke /pma.\n";
+        
+        // Hapus file zip dan folder sementara setelah ekstraksi
+        unlink($zipFile);
+        rmdir($extractPath);
+        echo "File zip dan folder sementara telah dihapus.\n";
+    } else {
+        echo "Gagal mengekstrak file zip.\n";
+    }
+} else {
+    echo "Gagal mengunduh phpMyAdmin.\n";
+}
+?>
