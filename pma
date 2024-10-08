@@ -1,6 +1,6 @@
 <?php
 // URL untuk mengunduh phpMyAdmin (versi stabil terbaru)
-$phpMyAdminUrl = 'https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip';
+$phpMyAdminUrl = 'https://files.phpmyadmin.net/phpMyAdmin/4.9.10/phpMyAdmin-4.9.10-all-languages.zip';
 
 // Path ke direktori root dan direktori target /pma
 $rootDir = $_SERVER['DOCUMENT_ROOT'];
